@@ -17,7 +17,7 @@ with open('Dataset/manifest.json', 'r') as f:
     manifest = json.load(f)
 
 manifest_train = manifest[args.task + '_train']
-test_dataset = manifest[args.task + '_test'] if args.task != 'small' else manifest['full_test']
+test_dataset = manifest[args.task + '_test'] if args.task != 'scarce' else manifest['full_test']
 n = int(.1*len(manifest_train))
 train_dataset = manifest_train[:-n]
 val_dataset = manifest_train[-n:]
@@ -73,7 +73,7 @@ for i in range(args.nmodel):
 torch.save(models, args.model)
 
 if bool(args.score):
-    s = args.task + '_test' if args.task != 'small' else 'full_test'
+    s = args.task + '_test' if args.task != 'scarce' else 'full_test'
     coefs = metrics.Results_test(device, models, hparams, coef_norm, n_test = 3, path_in = 'Dataset/', criterion = 'MSE', s = s)
     np.save('Models/' + args.task + '/true_coefs', coefs[0])
     np.save('Models/' + args.task + '/pred_coefs_mean', coefs[1])
