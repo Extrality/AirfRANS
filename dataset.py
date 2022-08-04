@@ -224,11 +224,10 @@ def Dataset(set, norm = False, coef_norm = None, crop = None, sample = None, n_b
         data = Data(pos = pos, x = x, y = y, surf = surf.bool())
         dataset.append(data)
 
-    mean_in = mean_in.astype(np.single)
-    mean_out = mean_out.astype(np.single)
-
     if norm and coef_norm is None:
         # Compute normalization
+        mean_in = mean_in.astype(np.single)
+        mean_out = mean_out.astype(np.single)
         # Umean = np.linalg.norm(data.x[:, 2:4], axis = 1).mean()     
         for k, data in enumerate(dataset):
             # data.x = data.x/torch.tensor([6, 6, Umean, Umean, 6, 1, 1], dtype = torch.float)
