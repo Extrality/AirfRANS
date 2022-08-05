@@ -69,7 +69,10 @@ def Infer_test(device, models, hparams, data, coef_norm = None):
         data_sampled.surf = data_sampled.surf[idx]
         data_sampled.batch = data_sampled.batch[idx]
 
-        data_sampled.edge_index = nng.radius_graph(x = data_sampled.pos.to(device), r = hparams['r'], loop = True, max_num_neighbors = int(hparams['max_neighbors'])).cpu()
+        try:
+            data_sampled.edge_index = nng.radius_graph(x = data_sampled.pos.to(device), r = hparams['r'], loop = True, max_num_neighbors = int(hparams['max_neighbors'])).cpu()
+        except KeyError:
+            None
 
         out = [torch.zeros_like(data.y)]*len(models)
         tim = np.zeros(len(models))
