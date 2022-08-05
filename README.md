@@ -35,6 +35,11 @@ optional arguments:
                         If you want to compute the score of the models on the associated test set.
                         (default: 0)
 ```
+
+For example, if you want to train two MLP models on the scarce data regime task and compute the scores of both models on the associated test set, you will have to run:
+```
+python main.py MLP -t scarce -n 2 -s 1
+```
  
  ## Results
 After training a model, the different training plots and training logs will be at the root of the ```metrics``` folder. The scores of the trained model on the associated test set are written in the folder ```scores/TASK/```. The visualization of the force coefficients plot and the boundary layers can be generated via the notebook ```visualization.ipynb```. You can find the scores and the plots given in the paper [here](). The dataset statistics can also be generated via the notebook ```dataset_stats.ipynb```.
