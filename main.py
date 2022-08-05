@@ -75,6 +75,8 @@ torch.save(models, args.model)
 if bool(args.score):
     s = args.task + '_test' if args.task != 'scarce' else 'full_test'
     coefs = metrics.Results_test(device, [models], hparams, coef_norm, n_test = 3, path_in = 'Dataset/', criterion = 'MSE', s = s)
+    # models can be a stack of the same model (for example MLP) on the task s, if you have another stack of another model (for example GraphSAGE)
+    # you can put in model argument [models_MLP, models_GraphSAGE] and it will output the results for both models (mean and std) in an ordered array.
     np.save('scores/' + args.task + '/true_coefs', coefs[0])
     np.save('scores/' + args.task + '/pred_coefs_mean', coefs[1])
     np.save('scores/' + args.task + '/pred_coefs_std', coefs[2])

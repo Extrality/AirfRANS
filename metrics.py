@@ -234,7 +234,8 @@ def Results_test(device, models, hparams, coef_norm, n_test = 3, path_in = 'Data
 
     Args:
         device (str): Device on which you do the prediction.
-        models (torch_geometric.nn.Module): List of models to predict with.
+        models (torch_geometric.nn.Module): List of models to predict with. It is a list of a list of different training of the same model.
+            For example, it can be [model_MLP, model_GraphSAGE] where model_MLP is itself a list of the form [MLP_1, MLP_2].
         hparams (dict): Dictionnary of hyperparameters of the models.
         coef_norm (tuple): Tuple of the form (mean_in, mean_out, std_in, std_out) for the denormalization of the data.
         n_test (int, optional): Number of airfoils on which you want to infer (they will be drawn randomly in the given set). Default: ``3``
