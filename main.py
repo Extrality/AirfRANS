@@ -74,16 +74,16 @@ torch.save(models, args.model)
 
 if bool(args.score):
     s = args.task + '_test' if args.task != 'scarce' else 'full_test'
-    coefs = metrics.Results_test(device, models, hparams, coef_norm, n_test = 3, path_in = 'Dataset/', criterion = 'MSE', s = s)
-    np.save('Models/' + args.task + '/true_coefs', coefs[0])
-    np.save('Models/' + args.task + '/pred_coefs_mean', coefs[1])
-    np.save('Models/' + args.task + '/pred_coefs_std', coefs[2])
+    coefs = metrics.Results_test(device, [models], hparams, coef_norm, n_test = 3, path_in = 'Dataset/', criterion = 'MSE', s = s)
+    np.save('scores/' + args.task + '/true_coefs', coefs[0])
+    np.save('scores/' + args.task + '/pred_coefs_mean', coefs[1])
+    np.save('scores/' + args.task + '/pred_coefs_std', coefs[2])
     for n, file in enumerate(coefs[3]):
-        np.save('Models/' + args.task + '/true_surf_coefs_' + str(n), file)
+        np.save('scores/' + args.task + '/true_surf_coefs_' + str(n), file)
     for n, file in enumerate(coefs[4]):
-        np.save('Models/' + args.task + '/surf_coefs_' + str(n), file)
-    np.save('Models/' + args.task + '/true_bls', coefs[5])
-    np.save('Models/' + args.task + '/bls', coefs[6])
+        np.save('scores/' + args.task + '/surf_coefs_' + str(n), file)
+    np.save('scores/' + args.task + '/true_bls', coefs[5])
+    np.save('scores/' + args.task + '/bls', coefs[6])
     for aero in glob.glob('airFoil2D*'):
-        os.rename(aero, 'Models/' + args.task + '/' + aero)
-    os.rename('score.json', 'Models/' + args.task + '/score.json')
+        os.rename(aero, 'scores/' + args.task + '/' + aero)
+    os.rename('score.json', 'scores/' + args.task + '/score.json')
