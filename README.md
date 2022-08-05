@@ -1,5 +1,5 @@
 # AirfRANS
-In this repository, you will find the different python scripts to train the available models on the AirfRANS dataset proposed at the NeurIPS 2022 Datasets and Benchmarks Track conference. You can find the paper submission [here](https://openreview.net/forum?id=Zp8YmiQ_bDC&referrer=%5Bthe%20profile%20of%20Florent%20Bonnet%5D(%2Fprofile%3Fid%3D~Florent_Bonnet1))
+In this repository, you will find the different python scripts to train the available models on the AirfRANS dataset proposed at the NeurIPS 2022 Datasets and Benchmarks Track conference. You can find the paper submission [here](https://openreview.net/forum?id=Zp8YmiQ_bDC&referrer=%5Bthe%20profile%20of%20Florent%20Bonnet%5D(%2Fprofile%3Fid%3D~Florent_Bonnet1)).
 
 ## Requirements
 * Python 3.9.12
@@ -15,7 +15,7 @@ To train a model, run main.py with the desired model architecture:
 python main.py GraphSAGE -t full
 ```
 
-Note that you must have the dataset in folder ```Dataset/``` at the root of this repository, you can find the dataset [here](https://data.isir.upmc.fr/extrality/NeurIPS_2022/Dataset.zip). You can change the parameters of the models and the training in the ```params.yaml``` file.
+Note that you must have the dataset in folder ```Dataset/``` at the root of this repository, you can download the dataset [here](https://data.isir.upmc.fr/extrality/NeurIPS_2022/Dataset.zip). You can change the parameters of the models and the training in the ```params.yaml``` file.
 
 ## Usage
 ```usage: main.py [-h] [-n NMODEL] [-w WEIGHT] [-t TASK] [-s SCORE] model
