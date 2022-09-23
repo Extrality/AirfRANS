@@ -18,7 +18,8 @@ python main.py GraphSAGE -t full
 Note that you must have the dataset in folder ```Dataset/``` at the root of this repository, you can download the dataset [here](https://data.isir.upmc.fr/extrality/NeurIPS_2022/Dataset.zip). You can change the parameters of the models and the training in the ```params.yaml``` file.
 
 ## Usage
-```usage: main.py [-h] [-n NMODEL] [-w WEIGHT] [-t TASK] [-s SCORE] model
+```
+usage: main.py [-h] [-n NMODEL] [-w WEIGHT] [-t TASK] [-s SCORE] model
 
 positional arguments:
   model                 The model you want to train, choose between MLP, GraphSAGE, PointNet, GUNet
