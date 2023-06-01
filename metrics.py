@@ -1,3 +1,5 @@
+import os.path as osp
+
 import numpy as np
 import scipy as sc
 import torch
@@ -60,7 +62,7 @@ def Infer_test(device, models, hparams, data, coef_norm = None):
     while cond: 
         i += 1       
         data_sampled = data.clone()
-        idx = random.sample(range(data_sampled.x.size(0)), hparams['subsampling'])            
+        idx = random.sample(range(data_sampled.x.size(0)), hparams[0]['subsampling'])            
         idx = torch.tensor(idx)
         idx_points = idx_points - set(map(tuple, data_sampled.pos[idx, :2].numpy()))
         data_sampled.pos = data_sampled.pos[idx]
@@ -69,14 +71,19 @@ def Infer_test(device, models, hparams, data, coef_norm = None):
         data_sampled.surf = data_sampled.surf[idx]
         data_sampled.batch = data_sampled.batch[idx]
 
-        try:
-            data_sampled.edge_index = nng.radius_graph(x = data_sampled.pos.to(device), r = hparams['r'], loop = True, max_num_neighbors = int(hparams['max_neighbors'])).cpu()
-        except KeyError:
-            None
+        # try:
+        #     data_sampled.edge_index = nng.radius_graph(x = data_sampled.pos.to(device), r = hparams['r'], loop = True, max_num_neighbors = int(hparams['max_neighbors'])).cpu()
+        # except KeyError:
+        #     None
 
         out = [torch.zeros_like(data.y)]*len(models)
         tim = np.zeros(len(models))
         for n, model in enumerate(models):
+            try:
+                data_sampled.edge_index = nng.radius_graph(x = data_sampled.pos.to(device), r = hparams[n]['r'], loop = True, max_num_neighbors = int(hparams[n]['max_neighbors'])).cpu()
+            except KeyError:
+                data_sampled.edge_index = None
+
             model.eval()
             data_sampled = data_sampled.to(device)
             start = time.time()
@@ -225,7 +232,7 @@ def Compute_coefficients(internals, airfoils, bool_surf, Uinf, angle, keep_vtk =
     else:
         return coefs
 
-def Results_test(device, models, hparams, coef_norm, n_test = 3, path_in = 'Dataset/', criterion = 'MSE', x_bl = [.2, .4, .6, .8], s = 'full_test'):
+def Results_test(device, models, hparams, coef_norm, path_in, path_out, n_test = 3, criterion = 'MSE', x_bl = [.2, .4, .6, .8], s = 'full_test'):
     '''
     Compute criterion scores for the fields over the volume and the surface, and for the force coefficients. Also compute Spearman's correlation scores
     for the force coefficients and the relative error for the wall shear stress and the pressure over the airfoil. Outputs the true, the mean predicted
@@ -236,17 +243,19 @@ def Results_test(device, models, hparams, coef_norm, n_test = 3, path_in = 'Data
         device (str): Device on which you do the prediction.
         models (torch_geometric.nn.Module): List of models to predict with. It is a list of a list of different training of the same model.
             For example, it can be [model_MLP, model_GraphSAGE] where model_MLP is itself a list of the form [MLP_1, MLP_2].
-        hparams (dict): Dictionnary of hyperparameters of the models.
+        hparams (list): List of dictionnaries of hyperparameters of the models.
         coef_norm (tuple): Tuple of the form (mean_in, mean_out, std_in, std_out) for the denormalization of the data.
+        path_in (str): Path to find the manifest.json file and the dataset.
+        path_out (str): Path to write the scores.
         n_test (int, optional): Number of airfoils on which you want to infer (they will be drawn randomly in the given set). Default: ``3``
-        path_in (str, optional): Path to find the manifest.json file. Default: ``"Dataset/"``
         criterion(str, optional): Criterion for the fields scores. Choose between MSE and MAE. Default: ``"MSE"``
         x_bl (list, optional): List of chord where the extract boundary layer prediction will be extracted. Default: ``[.2, .4, .6, .8]``
         s (str, optional): Dataset in which the simulation names are going to be sampled. Default: ``"full_test"``
     '''
     # Compute scores and all metrics for a 
     sns.set()
-    with open(path_in + 'manifest.json', 'r') as f:
+
+    with open(osp.join(path_in, 'manifest.json'), 'r') as f:
         manifest = json.load(f)
 
     test_dataset = manifest[s]
@@ -276,24 +285,24 @@ def Results_test(device, models, hparams, coef_norm, n_test = 3, path_in = 'Data
     for i in range(len(models[0])):
         model = [models[n][i] for n in range(len(models))]
         avg_loss_per_var = np.zeros((len(model), 4))
-        avg_loss = np.zeros(len(models))
+        avg_loss = np.zeros(len(model))
         avg_loss_surf_var = np.zeros((len(model), 4))
         avg_loss_vol_var = np.zeros((len(model), 4))
-        avg_loss_surf = np.zeros(len(models))
-        avg_loss_vol = np.zeros(len(models))
-        avg_rel_err_force = np.zeros((len(models), 2))
-        avg_loss_p = np.zeros((len(models)))
-        avg_loss_wss = np.zeros((len(models), 2))
+        avg_loss_surf = np.zeros(len(model))
+        avg_loss_vol = np.zeros(len(model))
+        avg_rel_err_force = np.zeros((len(model), 2))
+        avg_loss_p = np.zeros((len(model)))
+        avg_loss_wss = np.zeros((len(model), 2))
         internal = []
         airfoil = []
         pred_coef = []
         
         for j, data in enumerate(tqdm(test_loader)):
-            Uinf, angle = float(test_dataset[j].split('_')[2]), float(test_dataset[j].split('_')[3])            
+            Uinf, angle = float(test_dataset[j].split('_')[2]), float(test_dataset[j].split('_')[3])         
             outs, tim = Infer_test(device, model, hparams, data, coef_norm = coef_norm)
             times.append(tim)
-            intern = pv.read('Dataset/' + test_dataset[j] + '/' + test_dataset[j] + '_internal.vtu')
-            aerofoil = pv.read('Dataset/' + test_dataset[j] + '/' + test_dataset[j] + '_aerofoil.vtp')
+            intern = pv.read(osp.join(path_in, test_dataset[j], test_dataset[j] + '_internal.vtu'))
+            aerofoil = pv.read(osp.join(path_in, test_dataset[j], test_dataset[j] + '_aerofoil.vtp'))
             tc, true_intern, true_airfoil = Compute_coefficients([intern], [aerofoil], data.surf, Uinf, angle, keep_vtk = True)
             tc, true_intern, true_airfoil = tc[0], true_intern[0], true_airfoil[0]
             intern, aerofoil = Airfoil_test(intern, aerofoil, outs, coef_norm, data.surf)
@@ -369,7 +378,7 @@ def Results_test(device, models, hparams, coef_norm, n_test = 3, path_in = 'Data
         spear_coefs.append(spear_coef)
     spear_coefs = np.array(spear_coefs)
 
-    with open('score.json', 'w') as f:
+    with open(osp.join(path_out, 'score.json'), 'w') as f:
         json.dump(
             {   
                 'mean_time': times.mean(axis = 0),
@@ -419,7 +428,7 @@ def Results_test(device, models, hparams, coef_norm, n_test = 3, path_in = 'Data
         bl = []
         for j in range(len(internals[0][0])):
             internal_mean, airfoil_mean = Airfoil_mean([internals[k][i][j] for k in range(len(internals))], [airfoils[k][i][j] for k in range(len(airfoils))])
-            internal_mean.save(test_dataset[idx[i]] + '_' + str(j) + '.vtu')
+            internal_mean.save(osp.join(path_out, test_dataset[idx[i]] + '_' + str(j) + '.vtu'))
             surf_coef.append(np.array(metrics_NACA.surface_coefficients(airfoil_mean, aero_name)))
             b = []
             for x in x_bl:

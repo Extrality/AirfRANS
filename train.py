@@ -14,6 +14,9 @@ import metrics
 
 from tqdm import tqdm
 
+from pathlib import Path
+import os.path as osp
+
 def get_nb_trainable_params(model):
    '''
    Return the number of trainable parameters
@@ -111,7 +114,7 @@ class NumpyEncoder(json.JSONEncoder):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
-def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MSE', reg = 1, val_iter = 10, name_mod = 'GraphSAGE', val_sample = False):
+def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MSE', reg = 1, val_iter = 10, name_mod = 'GraphSAGE', val_sample = True):
     '''
         Args:
         device (str): device on which you want to do the computation.
@@ -121,9 +124,11 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
         hparams (dict): hyper parameters of the network.
         path (str): where to save the trained model and the figures.
         criterion (str, optional): chose between 'MSE', 'MAE', and 'MSE_weigthed'. The latter is the volumetric MSE plus the surface MSE computed independently. Default: 'MSE'.
-        ref (float, optional): weigth for the surface loss when criterion is 'MSE_weighted'. Default: 1.
+        reg (float, optional): weigth for the surface loss when criterion is 'MSE_weighted'. Default: 1.
         val_iter (int, optional): number of epochs between each validation step. Default: 10.
+        name_mod (str, optional): type of model. Default: 'GraphSAGE'.
     '''
+    Path(path).mkdir(parents = True, exist_ok = True)
 
     model = Net.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr = hparams['lr'])
@@ -266,7 +271,7 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
     params_model = get_nb_trainable_params(model).astype('float')
     print('Number of parameters:', params_model)
     print('Time elapsed: {0:.2f} seconds'.format(time_elapsed))
-    torch.save(model, path + 'model')
+    torch.save(model, osp.join(path, 'model'))
 
     sns.set()
     fig_train_surf, ax_train_surf = plt.subplots(figsize = (20, 5))
@@ -277,7 +282,7 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
     ax_train_surf.set_yscale('log')
     ax_train_surf.set_title('Train losses over the surface')
     ax_train_surf.legend(loc = 'best')
-    fig_train_surf.savefig(path + 'train_loss_surf.png', dpi = 150, bbox_inches = 'tight')
+    fig_train_surf.savefig(osp.join(path, 'train_loss_surf.png'), dpi = 150, bbox_inches = 'tight')
 
     fig_train_vol, ax_train_vol = plt.subplots(figsize = (20, 5))
     ax_train_vol.plot(train_loss_vol_list, label = 'Mean loss')
@@ -287,7 +292,7 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
     ax_train_vol.set_yscale('log')
     ax_train_vol.set_title('Train losses over the volume')
     ax_train_vol.legend(loc = 'best')
-    fig_train_vol.savefig(path + 'train_loss_vol.png', dpi = 150, bbox_inches = 'tight')
+    fig_train_vol.savefig(osp.join(path, 'train_loss_vol.png'), dpi = 150, bbox_inches = 'tight')
 
     if val_iter is not None:
         fig_val_surf, ax_val_surf = plt.subplots(figsize = (20, 5))
@@ -298,7 +303,7 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
         ax_val_surf.set_yscale('log')
         ax_val_surf.set_title('Validation losses over the surface')
         ax_val_surf.legend(loc = 'best')
-        fig_val_surf.savefig(path + 'val_loss_surf.png', dpi = 150, bbox_inches = 'tight')
+        fig_val_surf.savefig(osp.join(path, 'val_loss_surf.png'), dpi = 150, bbox_inches = 'tight')
 
         fig_val_vol, ax_val_vol = plt.subplots(figsize = (20, 5))
         ax_val_vol.plot(val_vol_list, label = 'Mean loss')
@@ -308,10 +313,10 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
         ax_val_vol.set_yscale('log')
         ax_val_vol.set_title('Validation losses over the volume')
         ax_val_vol.legend(loc = 'best')
-        fig_val_vol.savefig(path + 'val_loss_vol.png', dpi = 150, bbox_inches = 'tight');
+        fig_val_vol.savefig(osp.join(path, 'val_loss_vol.png'), dpi = 150, bbox_inches = 'tight');
         
         if val_iter is not None:
-            with open(path + 'log.json', 'a') as f:
+            with open(osp.join(path, name_mod + '_log.json'), 'a') as f:
                 json.dump(
                     {
                         'regression': 'Total',
