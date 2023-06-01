@@ -78,11 +78,11 @@ def boundary_layer(airfoil, internal, aero_name, x, y = 1e-3, resolution = int(1
     idx_extrado = (airfoil.points[:, 1] > camber)
 
     if extrado:
-        arg = np.argmin(np.abs(airfoil.points[idx_extrado, 0] - x))
+        arg = np.argmin(np.abs(airfoil.points[idx_extrado, 0] - x)) + 1
         arg = np.argwhere(idx_extrado.cumsum() == arg).min()
     else:
-        arg = np.argmin(np.abs(airfoil.points[~idx_extrado, 0] - x))
-        arg = np.argwhere((~idx_extrado).cumsum() == 280).min()
+        arg = np.argmin(np.abs(airfoil.points[~idx_extrado, 0] - x)) + 1
+        arg = np.argwhere((~idx_extrado).cumsum() == arg).min()
 
     if direction == 'normals':
         normals = -airfoil.point_data['Normals'][arg]
