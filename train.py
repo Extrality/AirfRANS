@@ -42,15 +42,16 @@ def train(device, model, train_loader, optimizer, scheduler, criterion = 'MSE', 
         targets = data_clone.y
 
         if criterion == 'MSE' or criterion == 'MSE_weighted':
-            criterion = nn.MSELoss(reduction = 'none')
+            loss_criterion = nn.MSELoss(reduction = 'none')
         elif criterion == 'MAE':
-            criterion = nn.L1Loss(reduction = 'none')
-        loss_per_var = criterion(out, targets).mean(dim = 0)
+            loss_criterion = nn.L1Loss(reduction = 'none')
+        loss_per_var = loss_criterion(out, targets).mean(dim = 0)
         total_loss = loss_per_var.mean()
-        loss_surf_var = criterion(out[data_clone.surf, :], targets[data_clone.surf, :]).mean(dim = 0)
-        loss_vol_var = criterion(out[~data_clone.surf, :], targets[~data_clone.surf, :]).mean(dim = 0)
+        loss_surf_var = loss_criterion(out[data_clone.surf, :], targets[data_clone.surf, :]).mean(dim = 0)
+        loss_vol_var = loss_criterion(out[~data_clone.surf, :], targets[~data_clone.surf, :]).mean(dim = 0)
         loss_surf = loss_surf_var.mean()
-        loss_vol = loss_vol_var.mean() 
+        loss_vol = loss_vol_var.mean()
+
         if criterion == 'MSE_weighted':            
             (loss_vol + reg*loss_surf).backward()           
         else:
@@ -87,14 +88,14 @@ def test(device, model, test_loader, criterion = 'MSE'):
 
         targets = data_clone.y
         if criterion == 'MSE' or 'MSE_weighted':
-            criterion = nn.MSELoss(reduction = 'none')
+            loss_criterion = nn.MSELoss(reduction = 'none')
         elif criterion == 'MAE':
-            criterion = nn.L1Loss(reduction = 'none')
+            loss_criterion = nn.L1Loss(reduction = 'none')
 
-        loss_per_var = criterion(out, targets).mean(dim = 0)
+        loss_per_var = loss_criterion(out, targets).mean(dim = 0)
         loss = loss_per_var.mean()
-        loss_surf_var = criterion(out[data_clone.surf, :], targets[data_clone.surf, :]).mean(dim = 0)
-        loss_vol_var = criterion(out[~data_clone.surf, :], targets[~data_clone.surf, :]).mean(dim = 0)
+        loss_surf_var = loss_criterion(out[data_clone.surf, :], targets[data_clone.surf, :]).mean(dim = 0)
+        loss_vol_var = loss_criterion(out[~data_clone.surf, :], targets[~data_clone.surf, :]).mean(dim = 0)
         loss_surf = loss_surf_var.mean()
         loss_vol = loss_vol_var.mean()  
 
@@ -180,9 +181,11 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
         train_loader = DataLoader(train_dataset_sampled, batch_size = hparams['batch_size'], shuffle = True)
         del(train_dataset_sampled)
 
-        _, _, loss_surf_var, loss_vol_var, loss_surf, loss_vol = train(device, model, train_loader, optimizer, lr_scheduler, criterion, reg = reg)
+        train_loss, _, loss_surf_var, loss_vol_var, loss_surf, loss_vol = train(device, model, train_loader, optimizer, lr_scheduler, criterion, reg = reg)        
+        if criterion == 'MSE_weighted':
+            train_loss = reg*loss_surf + loss_vol
         del(train_loader)
-        train_loss = loss_surf + loss_vol
+
         train_loss_surf_list.append(loss_surf)
         train_loss_vol_list.append(loss_vol)
         loss_surf_var_list.append(loss_surf_var)
@@ -222,7 +225,7 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
                         val_loader = DataLoader(val_dataset_sampled, batch_size = 1, shuffle = True)
                         del(val_dataset_sampled)
 
-                        _, _, val_surf_var, val_vol_var, val_surf, val_vol = test(device, model, val_loader, criterion)
+                        val_loss, _, val_surf_var, val_vol_var, val_surf, val_vol = test(device, model, val_loader, criterion)
                         del(val_loader)
                         val_surf_vars.append(val_surf_var)
                         val_vol_vars.append(val_vol_var)
@@ -249,8 +252,10 @@ def main(device, train_dataset, val_dataset, Net, hparams, path, criterion = 'MS
 
                     #                 data.edge_attr = torch.cat([x_i - x_j, v_i - v_j, p_i - p_j, sdf_i, sdf_j, v_inf, normal_i, normal_j], dim = 1)
                     #     val_loader = DataLoader(val_dataset, batch_size = 1, shuffle = False)
-                    _, _, val_surf_var, val_vol_var, val_surf, val_vol = test(device, model, val_loader, criterion)
-                val_loss = val_surf + val_vol
+                    val_loss, _, val_surf_var, val_vol_var, val_surf, val_vol = test(device, model, val_loader, criterion)
+
+                if criterion == 'MSE_weigthed':
+                    val_loss = reg*val_surf + val_vol
                 val_surf_list.append(val_surf)
                 val_vol_list.append(val_vol)
                 val_surf_var_list.append(val_surf_var)
