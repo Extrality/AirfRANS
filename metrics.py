@@ -1,4 +1,5 @@
 import os.path as osp
+import pathlib
 
 import numpy as np
 import scipy as sc
@@ -254,6 +255,7 @@ def Results_test(device, models, hparams, coef_norm, path_in, path_out, n_test =
     '''
     # Compute scores and all metrics for a 
     sns.set()
+    pathlib.Path(path_out).mkdir(parents = True, exist_ok = True)
 
     with open(osp.join(path_in, 'manifest.json'), 'r') as f:
         manifest = json.load(f)
