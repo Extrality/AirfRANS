@@ -55,6 +55,6 @@ title={Airf{RANS}: High Fidelity Computational Fluid Dynamics Dataset for Approx
 author={Florent Bonnet and Jocelyn Ahmed Mazari and Paola Cinnella and Patrick Gallinari},
 booktitle={Thirty-sixth Conference on Neural Information Processing Systems Datasets and Benchmarks Track},
 year={2022},
-url={https://openreview.net/forum?id=Zp8YmiQ_bDC}
+url={https://arxiv.org/abs/2212.07564}
 }
 ```
