@@ -1,5 +1,5 @@
 # AirfRANS
-In this repository, you will find the different python scripts to train the available models on the AirfRANS dataset proposed at the NeurIPS 2022 Datasets and Benchmarks Track conference. You can find the paper [here](https://openreview.net/forum?id=Zp8YmiQ_bDC&referrer=%5Bthe%20profile%20of%20Florent%20Bonnet%5D(%2Fprofile%3Fid%3D~Florent_Bonnet1)).
+In this repository, you will find the different python scripts to train the available models on the AirfRANS dataset proposed at the NeurIPS 2022 Datasets and Benchmarks Track conference. You can find the paper [here](https://openreview.net/forum?id=Zp8YmiQ_bDC). **Disclaimer:** An important update correcting an inconsistency in the Machine Learning experiments proposed in the main part of the NeurIPS version of the paper has been done. Please refer to the [ArXiv version](https://arxiv.org/abs/2212.07564) for the up to date version.
 
 ## Requirements
 * Python 3.9.12
@@ -43,7 +43,7 @@ python main.py MLP -t scarce -n 2 -s 1
 ```
  
  ## Results
-After training a model, the different training plots and training logs will be at the root of the ```metrics``` folder. The scores of the trained model on the associated test set are written in the folder ```scores/TASK/```. The visualization of the force coefficients plot and the boundary layers can be generated via the notebook ```visualization.ipynb```. You can find the scores and the plots given in the paper [here](). The dataset statistics can also be generated via the notebook ```dataset_stats.ipynb```.
+After training a model, the different training plots and training logs will be at the root of the ```metrics``` folder. The scores of the trained model on the associated test set are written in the folder ```scores/TASK/```. The visualization of the force coefficients plot and the boundary layers can be generated via the notebook ```visualization.ipynb```. You can find the scores and the plots given in the paper [here](https://data.isir.upmc.fr/extrality/NeurIPS_2022/scores.zip). The dataset statistics can also be generated via the notebook ```dataset_stats.ipynb```.
 
 ## Citation
 
