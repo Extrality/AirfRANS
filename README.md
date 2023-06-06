@@ -46,6 +46,7 @@ python main.py MLP -t scarce -n 2 -s 1
 After training a model, the different training plots and training logs will be at the root of the ```metrics``` folder. The scores of the trained model on the associated test set are written in the folder ```scores/TASK/```. The visualization of the force coefficients plot and the boundary layers can be generated via the notebook ```visualization.ipynb```. You can find the scores and the plots given in the paper [here](https://data.isir.upmc.fr/extrality/NeurIPS_2022/scores.zip). The dataset statistics can also be generated via the notebook ```dataset_stats.ipynb```.
 
 ## Citation
+Please cite this paper if you use this dataset in your own work.
 
 ```
 @inproceedings{
